@@ -31,7 +31,7 @@ def main() -> int:
         if "id" in m and not ID_RE.match(str(m["id"])):
             print(f"::error::{manifest} invalid id: {m['id']!r}")
             fail = True
-        cfg = f"blueprints/{d}/{m.get('config', 'config.yml')}"
+        cfg = f"blueprints/{d}/{m.get('config', 'range-config.yml')}"
         if not os.path.isfile(cfg):
             print(f"::error::{cfg} missing")
             fail = True

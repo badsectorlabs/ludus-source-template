@@ -1,4 +1,4 @@
-# Ludus Source Starter
+# Ludus Source Template
 
 A Ludus source is a versioned bundle of Packer templates, Ansible roles, and blueprints packaged in a specific layout. Like a container image, one URL ships everything Ludus needs; `ludus source add` registers it in a single step.
 

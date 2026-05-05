@@ -9,4 +9,4 @@ config: range-config.yml                                                     # r
 
 tags: [example]                                                              # optional: filter via `ludus blueprint list --tag <tag>`
 # thumbnail: thumbnail.png                                                   # optional: relative path
-# min_ludus_version: 2.0.0                                                   # optional: hard install gate
+# min_ludus_version: 2.1.2                                                   # optional: hard install gate

@@ -6,5 +6,6 @@ ludus:
     ip_last_octet: 10
     ram_gb: 2
     cpus: 2
+    linux: true
     roles:
       - geerlingguy.docker

@@ -2,7 +2,7 @@
 
 A Ludus source is a versioned bundle of Packer templates, Ansible roles, and blueprints, served from a git repo, tarball, or local directory. `ludus source add` registers the contents in one step.
 
-This repo is a starting point for publishing your own. Click **Use this template**, edit the files, push, then run:
+This repo is a starting point for publishing your own source. Click **Use this template**, edit the files, push, then run:
 
 ```bash
 ludus source add https://github.com/<you>/<repo>
@@ -36,6 +36,7 @@ blueprints/example/                  one blueprint
 ├── blueprint.yml                    display metadata
 ├── range-config.yml                 the range config
 ├── requirements.yml                 pinned galaxy roles, off-galaxy roles
+├── subscription_refs.yml            license-gated role names (delete if unused)
 ├── roles/                           Ansible roles only this blueprint uses
 └── templates/                       Packer templates only this blueprint uses
 
@@ -60,6 +61,18 @@ roles:
 ```
 
 Names must match what `roles:` in `range-config.yml` references; otherwise Ludus installs one role and tries to use another.
+
+## Subscription roles
+
+If your blueprint references roles from the Ludus subscription catalog (Enterprise / private roles), declare them in `blueprints/<id>/subscription_refs.yml`:
+
+```yaml
+roles:
+  - ludus_ghosts_client
+  - ludus_adcs
+```
+
+The bytes of subscription roles never travel in the bundle; only their names. At apply time Ludus reads this file and returns `403` with the unmet roles when the target instance has no valid license or the catalog doesn't cover one of them. Plain galaxy roles and local roles do NOT belong here.
 
 ## Custom Packer templates
 

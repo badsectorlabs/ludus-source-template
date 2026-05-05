@@ -30,7 +30,8 @@ A blueprints-only source, a roles-only source, and a templates-only source are a
 LICENSE                              MIT placeholder; replace with your own
 source.yml                           repo metadata: name, authors, homepage, license
 scripts/validate.py                  manifest schema check; extend with your own rules
-.github/workflows/validate.yml       runs scripts/validate.py on every push
+.github/workflows/validate.yml       GitHub Actions: runs scripts/validate.py on every push
+.gitlab-ci.yml                       GitLab CI: runs scripts/validate.py on every push
 
 blueprints/example/                  one blueprint
 ├── blueprint.yml                    display metadata

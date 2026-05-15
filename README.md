@@ -19,8 +19,8 @@ A source can carry any combination of three artifact types. All three are option
 | Artifact         | Where it goes                                                                                  | Visibility                                                          |
 |------------------|------------------------------------------------------------------------------------------------|---------------------------------------------------------------------|
 | Blueprints       | `blueprints/<id>/`                                                                             | Per-source, addressed as `<sourceID>/<id>`                          |
-| Packer templates | `templates/<n>/` (shared) or `blueprints/<id>/templates/<n>/` (per-blueprint)                  | Global registry by name                                             |
-| Ansible roles    | `roles/<n>/` (shared) or `blueprints/<id>/roles/<n>/` (per-blueprint)                          | User-scoped by default; `--global-roles` for instance-wide          |
+| Packer templates | `templates/<n>/` at source root                                                                | Global registry by name                                             |
+| Ansible roles    | `roles/<n>/` at source root                                                                    | User-scoped by default; `--global-roles` for instance-wide          |
 
 A blueprints-only source, a roles-only source, and a templates-only source are all valid.
 
@@ -36,44 +36,44 @@ scripts/validate.py                  manifest schema check; extend with your own
 blueprints/example/                  one blueprint
 ├── blueprint.yml                    display metadata
 ├── range-config.yml                 the range config
-├── requirements.yml                 pinned galaxy roles, off-galaxy roles
-├── subscription_refs.yml            license-gated role names (delete if unused)
-├── roles/                           Ansible roles only this blueprint uses
-└── templates/                       Packer templates only this blueprint uses
+└── requirements.yml                 galaxy roles, collections, subscription roles
 
-roles/                               Ansible roles shared across blueprints in this source
-templates/                           Packer templates shared across blueprints in this source
+roles/                               Ansible roles shipped by this source
+templates/                           Packer templates shipped by this source
 ```
 
 The empty `roles/` and `templates/` directories are tracked with `.gitkeep` so the structure ships with the template. Drop a role or template in (or delete the directories you don't need).
 
-## Galaxy and git roles
+## Role and collection dependencies
 
-Plain galaxy roles like `geerlingguy.docker` need no `requirements.yml`; just list them under `roles:` in `range-config.yml`. Use `requirements.yml` to pin a version or pull from GitHub/GitLab:
+`blueprints/<id>/requirements.yml` is the single manifest for everything a blueprint needs from outside the bundle. Every role referenced under `roles:` in `range-config.yml` must be declared here (or shipped locally under `roles/`); Ludus surfaces an undeclared-dependency warning at sync time otherwise.
+
+Three sections, all optional:
 
 ```yaml
-# blueprints/<id>/requirements.yml
 roles:
   - name: geerlingguy.docker
     version: 7.4.4                                  # pin a galaxy role
   - name: badsectorlabs.ludus_adcs                  # off-galaxy: name + src
     src: https://github.com/badsectorlabs/ludus_adcs
     version: v1.2.0
+
+collections:
+  - name: community.crypto                          # required when range-config
+    version: 2.16.0                                 # references a FQCN role
+                                                    # like community.crypto.openssl_certificate
+
+subscription_roles:
+  - ludus_ghosts_client                             # license-gated role; bare scalar
+  - name: ludus_adcs                                # or structured shape
 ```
 
-Names must match what `roles:` in `range-config.yml` references; otherwise Ludus installs one role and tries to use another.
+A few rules worth knowing:
 
-## Subscription roles
-
-If your blueprint references roles from the Ludus subscription catalog (Enterprise / private roles), declare them in `blueprints/<id>/subscription_refs.yml`:
-
-```yaml
-roles:
-  - ludus_ghosts_client
-  - ludus_adcs
-```
-
-The bytes of subscription roles never travel in the bundle; only their names. At apply time Ludus reads this file and returns `403` with the unmet roles when the target instance has no valid license or the catalog doesn't cover one of them. Plain galaxy roles and local roles do NOT belong here.
+- **Names must match** what `range-config.yml` references; otherwise Ludus installs one role and tries to run another.
+- **Collections are required for FQCN role refs.** A 3-part reference like `namespace.collection.role` won't work unless `namespace.collection` is listed under `collections:`.
+- **Subscription roles never travel in the bundle** — only their names. At apply time Ludus serves them from the license catalog. If the target instance has no valid license, or the catalog doesn't cover one of the names, the apply returns `403`. Version pinning isn't currently supported for subscription roles — whatever the catalog reports as current gets installed.
+- **Local roles win over galaxy.** If a `roles/<name>/` directory exists in the bundle (per-blueprint or at source root), it satisfies the dependency without a galaxy lookup.
 
 ## Custom Packer templates
 
@@ -102,7 +102,13 @@ roles/my_helper/
 └── meta/main.yml            role metadata, dependencies
 ```
 
-Reference the role by directory name (`my_helper`) under `roles:` in `range-config.yml`. If a local role shares a name with a galaxy role, Ludus skips the galaxy install and uses the local role.
+Local roles are installed to the user's Ansible roles directory at `source add` time and are usable from any range-config thereafter — they don't need to be referenced from a blueprint in this source. When a blueprint *does* reference one, use the directory name (`my_helper`) under `roles:` in `range-config.yml`. If a local role shares a name with a galaxy role, Ludus skips the galaxy install and uses the local role.
+
+## Sharing a single blueprint
+
+`ludus blueprint export <id>` produces a tarball with the blueprint manifest, range-config, and requirements.yml — a **config snapshot**, not a full installable bundle. Galaxy roles, collections, and subscription roles travel as names and are re-resolved on the importer's instance. Custom local roles and Packer templates shipped at the source root **do not** travel with a blueprint export.
+
+If you want users to install all of your assets, distribute the **source** (a git URL or source tarball) — that's the installable unit. Use blueprint export when you want to share a config without all its dependencies (forum posts, internal audit, blueprint-from-range snapshots).
 
 ## Required fields
 

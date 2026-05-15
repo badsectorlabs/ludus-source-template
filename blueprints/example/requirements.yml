@@ -1,7 +1,15 @@
-# requirements.yml: pinned galaxy roles and roles hosted off galaxy.ansible.com.
-# Only required when you need to pin versions or pull from a git host.
-# Plain galaxy roles can be referenced by bare name in range-config.yml without
-# listing them here.
+# requirements.yml: every role and collection this blueprint depends on.
+#
+# Three sections are recognized; all are optional. List every role referenced
+# under `roles:` in range-config.yml here (or bundle it locally under roles/),
+# otherwise Ludus will surface an undeclared-dependency warning at sync time.
+#
+#   roles:               ansible-galaxy roles (galaxy.ansible.com or git URL)
+#   collections:         ansible-galaxy collections; required for any
+#                        3-part FQCN role reference (`namespace.collection.role`)
+#   subscription_roles:  license-gated roles served from the Ludus catalog.
+#                        Names only -- version pinning is not currently supported;
+#                        whatever the catalog reports as current is installed.
 
 roles:
   # Pin a galaxy role to a specific version
@@ -12,3 +20,22 @@ roles:
   # - name: badsectorlabs.ludus_adcs
   #   src: https://github.com/badsectorlabs/ludus_adcs
   #   version: v1.2.0
+
+# collections:
+#   # Required when range-config.yml references a 3-part FQCN role like
+#   # `community.crypto.openssl_certificate` -- the parent collection must
+#   # be declared here.
+#   - name: community.crypto
+#     version: 2.16.0
+#
+#   # Off-galaxy collection from git. NOTE: collections use `source:` (not
+#   # `src:` like roles do) and require `type:` to be set explicitly.
+#   - name: my.collection
+#     source: https://github.com/foo/my-collection.git
+#     type: git
+#     version: main
+
+# subscription_roles:
+#   # Both shapes accepted:
+#   - ludus_ghosts_client          # bare scalar
+#   - name: ludus_adcs             # structured form

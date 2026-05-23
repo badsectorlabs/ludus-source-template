@@ -2,7 +2,7 @@
 
 A Ludus source is a versioned bundle of Packer templates, Ansible roles, and blueprints, served from a git repo, tarball, or local directory. `ludus source add` registers the contents in one step.
 
-This repo is a starting point for publishing your own source. Click **Use this template**, edit the files, push, then run:
+This repo is a starting point for publishing your own source. Use it as a template (or clone it and repoint `origin` at your new repo), edit the files, push, then run:
 
 ```bash
 ludus source add https://github.com/<you>/<repo>

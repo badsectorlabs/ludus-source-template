@@ -44,6 +44,8 @@ templates/                           Packer templates shipped by this source
 
 The empty `roles/` and `templates/` directories are tracked with `.gitkeep` so the structure ships with the template. Drop a role or template in (or delete the directories you don't need).
 
+`scripts/validate.py` and the two CI workflows ship a basic manifest check out of the box — it confirms your `blueprint.yml` parses and references resolve. If your org has its own CI conventions, delete `scripts/` and `.github/workflows/validate.yml` (and/or `.gitlab-ci.yml`) and wire in your own; nothing else in the template depends on them.
+
 ## Role and collection dependencies
 
 `blueprints/<id>/requirements.yml` is the single manifest for everything a blueprint needs from outside the bundle. Every role referenced under `roles:` in `range-config.yml` must be declared here (or shipped locally under `roles/`); Ludus surfaces an undeclared-dependency warning at sync time otherwise.
@@ -103,12 +105,6 @@ roles/my_helper/
 ```
 
 Local roles are installed to the user's Ansible roles directory at `source add` time and are usable from any range-config thereafter — they don't need to be referenced from a blueprint in this source. When a blueprint *does* reference one, use the directory name (`my_helper`) under `roles:` in `range-config.yml`. If a local role shares a name with a galaxy role, Ludus skips the galaxy install and uses the local role.
-
-## Sharing a single blueprint
-
-`ludus blueprint export <id>` produces a tarball with the blueprint manifest, range-config, and requirements.yml — a **config snapshot**, not a full installable bundle. Galaxy roles, collections, and subscription roles travel as names and are re-resolved on the importer's instance. Custom local roles and Packer templates shipped at the source root **do not** travel with a blueprint export.
-
-If you want users to install all of your assets, distribute the **source** (a git URL or source tarball) — that's the installable unit. Use blueprint export when you want to share a config without all its dependencies (forum posts, internal audit, blueprint-from-range snapshots).
 
 ## Required fields
 

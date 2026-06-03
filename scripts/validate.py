@@ -5,6 +5,7 @@ A Ludus source can ship any combination of Packer templates, Ansible roles,
 and blueprints. This script checks whatever is present:
 
   - source.yml       (optional file)   -- manifest_version required if present
+  - templates/<n>/template.yml (optional) -- manifest_version required if present
   - blueprints/<id>/blueprint.yml      -- required fields when the dir exists
   - blueprints/<id>/<config>           -- referenced by blueprint.yml.config
   - blueprints/<id>/requirements.yml   -- schema check for roles/collections/
@@ -30,6 +31,7 @@ import yaml
 ID_RE = re.compile(r'^[A-Za-z][A-Za-z0-9_\-]*(/[A-Za-z0-9_\-]+){0,2}$')
 BLUEPRINT_REQUIRED = {"manifest_version", "id", "name", "description", "version", "config"}
 SOURCE_REQUIRED = {"manifest_version"}
+TEMPLATE_REQUIRED = {"manifest_version"}
 
 
 def load_yaml(path):
@@ -48,6 +50,23 @@ def validate_source_yml(fail):
     missing = SOURCE_REQUIRED - m.keys()
     if missing:
         print(f"::error::source.yml missing fields: {sorted(missing)}")
+        fail = True
+    return fail
+
+
+def validate_template(d, fail):
+    """template.yml is optional; when present it must carry manifest_version."""
+    manifest = f"templates/{d}/template.yml"
+    if not os.path.isfile(manifest):
+        return fail
+    try:
+        m = load_yaml(manifest)
+    except yaml.YAMLError as e:
+        print(f"::error::{manifest} invalid YAML: {e}")
+        return True
+    missing = TEMPLATE_REQUIRED - m.keys()
+    if missing:
+        print(f"::error::{manifest} missing fields: {sorted(missing)}")
         fail = True
     return fail
 
@@ -208,6 +227,11 @@ def main() -> int:
         for d in sorted(os.listdir("blueprints")):
             if os.path.isdir(f"blueprints/{d}"):
                 fail = validate_blueprint(d, fail)
+
+    if has_templates:
+        for d in sorted(os.listdir("templates")):
+            if os.path.isdir(f"templates/{d}"):
+                fail = validate_template(d, fail)
 
     return 1 if fail else 0
 

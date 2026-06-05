@@ -55,7 +55,8 @@ def validate_source_yml(fail):
 
 
 def validate_template(d, fail):
-    """template.yml is optional; when present it must carry manifest_version."""
+    """template.yml is optional; when present it must carry manifest_version,
+    and any thumbnail: must be a relative path to a file that exists."""
     manifest = f"templates/{d}/template.yml"
     if not os.path.isfile(manifest):
         return fail
@@ -68,6 +69,17 @@ def validate_template(d, fail):
     if missing:
         print(f"::error::{manifest} missing fields: {sorted(missing)}")
         fail = True
+    thumb = m.get("thumbnail")
+    if thumb is not None:
+        if not isinstance(thumb, str) or not thumb:
+            print(f"::error::{manifest} thumbnail must be a non-empty string")
+            fail = True
+        elif thumb.startswith("/") or ".." in thumb.split("/"):
+            print(f"::error::{manifest} thumbnail must be a relative path inside the template dir: {thumb!r}")
+            fail = True
+        elif not os.path.isfile(f"templates/{d}/{thumb}"):
+            print(f"::error::{manifest} thumbnail file not found: templates/{d}/{thumb}")
+            fail = True
     return fail
 
 

@@ -22,7 +22,7 @@ Installed blueprints are per-source, addressed as `<sourceID>/<id>` (e.g. `ludus
 - `version` — your semver (see [Versioning](#versioning))
 - `config` — path to the range config, relative to `blueprint.yml`
 
-Optional: `tags`, `thumbnail`, `min_ludus_version`. License, homepage, and authors are inherited from the source's `source.yml`.
+Optional: `tags`, `thumbnail_path`, `min_ludus_version`. License, homepage, and authors are inherited from the source's `source.yml`.
 
 ## Role and collection dependencies
 

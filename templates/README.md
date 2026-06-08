@@ -4,8 +4,8 @@ Each `templates/<name>/` directory is a standard Ludus Packer template, the same
 
 ```
 templates/my-debian-base/
-├── my-debian-base.pkr.hcl   the Packer build config (incl. `description` + `thumbnail_path` variables)
-├── thumbnail.png            optional: the catalog icon referenced by the thumbnail_path variable
+├── my-debian-base.pkr.hcl   the Packer build config (incl. `description` + `icon_path` variables)
+├── icon.png            optional: the catalog icon referenced by the icon_path variable
 ├── http/                    Linux: preseed.cfg / kickstart served at install time
 └── Autounattend.xml         Windows only: unattended install answer file
 ```
@@ -24,23 +24,12 @@ variable "description" {
   default = "Debian 12 (Bookworm) minimal x64 server."
 }
 
-variable "thumbnail_path" {
+variable "icon_path" {
   type    = string
-  default = "thumbnail.png"
+  default = "icon.png"
 }
 ```
 
 Packer requires a variable's `default` to be a literal, so both stay plain static strings — unlike `template_description`, which is a build-time `local` (it carries an `isotime` stamp and is the Proxmox template's own notes, not a catalog blurb).
 
-`thumbnail_path` is a **relative path** to an image bundled in the template dir. Ludus stores it on the template's record; the GUI shows it on template cards, falling back to a built-in OS glyph when absent. Use a **square, transparent PNG** (256×256 works well) and keep it legible small — it renders as little as 24px. Raster only (PNG/JPEG/GIF/WebP); SVG is not accepted.
-
-## template.yml (optional)
-
-A template needs no `template.yml` at all — the metadata above lives in the packer file. For backward compatibility a `template.yml` is still honored as a fallback for both fields:
-
-```yaml
-description: Debian 12 (Bookworm) minimal x64 server.
-thumbnail: thumbnail.png
-```
-
-`manifest_version` is optional — Ludus defaults it to 1, and you only need to set it once a future breaking schema requires it.
+`icon_path` is a **relative path** to an image bundled in the template dir. Ludus stores it on the template's record; the GUI shows it on template cards, falling back to a built-in OS glyph when absent. Use a **square, transparent PNG** (256×256 works well) and keep it legible small — it renders as little as 24px. Raster only (PNG/JPEG/GIF/WebP); SVG is not accepted.

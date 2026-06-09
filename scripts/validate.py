@@ -15,7 +15,7 @@ and blueprints. This script checks whatever is present:
                                           collection for FQCN refs,
                                           subscription_roles) or bundled
                                           locally (blueprint roles/ or source-
-                                          root roles/)
+                                          root ansible/roles/)
 
 A source with only roles/ or templates/ is valid and exits clean. An empty
 source is rejected.
@@ -119,9 +119,9 @@ def role_refs_in_range_config(path):
 
 
 def bundled_role_names(blueprint_id):
-    """Return roles bundled in blueprint or at source root."""
+    """Return roles bundled in blueprint or at the source root."""
     names = set()
-    for parent in (f"blueprints/{blueprint_id}/roles", "roles"):
+    for parent in (f"blueprints/{blueprint_id}/roles", "ansible/roles"):
         if os.path.isdir(parent):
             for d in os.listdir(parent):
                 if os.path.isdir(os.path.join(parent, d)):
@@ -181,7 +181,7 @@ def validate_blueprint(d, fail):
         print(
             f"::error::{cfg}: role {ref!r} is referenced but not declared in "
             f"{reqs_path} (`roles:` or `subscription_roles:`) and not bundled "
-            f"locally under roles/"
+            f"locally under ansible/roles/"
         )
         fail = True
 
@@ -195,15 +195,18 @@ def main() -> int:
     has_blueprints = os.path.isdir("blueprints") and any(
         os.path.isdir(f"blueprints/{d}") for d in os.listdir("blueprints")
     )
-    has_roles = os.path.isdir("roles") and any(
-        os.path.isdir(f"roles/{d}") for d in os.listdir("roles")
+    has_roles = os.path.isdir("ansible/roles") and any(
+        os.path.isdir(f"ansible/roles/{d}") for d in os.listdir("ansible/roles")
+    )
+    has_collections = os.path.isdir("ansible/collections") and any(
+        os.path.isdir(f"ansible/collections/{d}") for d in os.listdir("ansible/collections")
     )
     has_templates = os.path.isdir("templates") and any(
         os.path.isdir(f"templates/{d}") for d in os.listdir("templates")
     )
 
-    if not (has_blueprints or has_roles or has_templates):
-        print("::error::source ships nothing; populate at least one of blueprints/, roles/, or templates/")
+    if not (has_blueprints or has_roles or has_collections or has_templates):
+        print("::error::source ships nothing; populate at least one of blueprints/, ansible/roles/, ansible/collections/, or templates/")
         return 1
 
     if has_blueprints:

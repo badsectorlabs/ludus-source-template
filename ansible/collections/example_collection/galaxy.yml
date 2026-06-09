@@ -1,0 +1,10 @@
+# galaxy.yml: the collection manifest Ludus reads for the FQCN and description.
+namespace: my_namespace          # REQUIRED: lowercase, underscores allowed
+name: example_collection         # REQUIRED: lowercase, underscores allowed
+version: 1.0.0                   # REQUIRED by ansible-galaxy
+readme: README.md
+description: "Example Ludus source collection — replace with your own"
+authors:
+  - "Your Name <you@example.com>"
+license:
+  - MIT

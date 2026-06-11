@@ -30,9 +30,6 @@ A blueprints-only source, a roles-only source, and a templates-only source are a
 ```
 LICENSE                              MIT placeholder; replace with your own
 source.yml                           repo metadata (see below)
-scripts/validate.py                  manifest schema check; extend with your own rules
-.github/workflows/validate.yml       GitHub Actions: runs scripts/validate.py on every push
-.gitlab-ci.yml                       GitLab CI: runs scripts/validate.py on every push
 
 blueprints/                          blueprints + their dependencies — see blueprints/README.md
 templates/                           Packer templates — see templates/README.md
@@ -40,7 +37,7 @@ ansible/roles/                       local Ansible roles — see ansible/roles/R
 ansible/collections/                 local Ansible collections — see ansible/collections/README.md
 ```
 
-`scripts/validate.py` and the two CI workflows ship a basic manifest check out of the box — it confirms your manifests parse and references resolve. If your org has its own CI conventions, delete `scripts/` and `.github/workflows/validate.yml` (and/or `.gitlab-ci.yml`) and wire in your own; nothing else in the template depends on them.
+The manifest schema is validated by Ludus when the source is registered or synced (`ludus source add`).
 
 ## Submodules
 

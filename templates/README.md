@@ -10,7 +10,7 @@ templates/my-debian-base/
 └── Autounattend.xml         Windows only: unattended install answer file
 ```
 
-An annotated, buildable starter is vendored here as [`ludus_packer_template_template/`](ludus_packer_template_template) — copy it as your starting point.
+An annotated, buildable starter is vendored here as [`ludus_packer_template/`](ludus_packer_template) — copy it as your starting point.
 
 Templates install into each installing user's own Packer directory and are keyed by the template's `*-template` name (the `vm_name` in the `.pkr.hcl`, not the folder name). A name that matches an already-installed or built-in template is skipped rather than overwritten, so prefix names you expect to share with your source slug (`bsl-debian-base`, not `debian-base`).
 

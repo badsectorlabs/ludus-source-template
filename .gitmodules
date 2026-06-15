@@ -1,6 +1,6 @@
 [submodule "ansible/roles/ludus_ansible_role_template"]
 	path = ansible/roles/ludus_ansible_role_template
 	url = https://github.com/badsectorlabs/ludus_ansible_role_template.git
-[submodule "templates/ludus_packer_template_template"]
-	path = templates/ludus_packer_template_template
-	url = https://github.com/badsectorlabs/ludus_packer_template_template.git
+[submodule "templates/ludus_packer_template"]
+	path = templates/ludus_packer_template
+	url = https://github.com/badsectorlabs/ludus_packer_template.git

@@ -1,0 +1,55 @@
+# Runs once, at template build time. Everything here is baked into the image
+# and inherited by every VM cloned from this template — bake in what every VM
+# should have, and leave per-VM/per-range setup to Ludus roles.
+- name: Customize the template image
+  hosts: all
+  become: true
+  tasks:
+    # --- Your customization goes here ----------------------------------------
+    # Examples:
+    #
+    # - name: Install baseline packages
+    #   ansible.builtin.apt:
+    #     name:
+    #       - curl
+    #       - git
+    #       - tmux
+    #     update_cache: true
+    #
+    # - name: Drop in a config file
+    #   ansible.builtin.copy:
+    #     src: ../files/motd        # put supporting files anywhere in the repo
+    #     dest: /etc/motd
+    # --------------------------------------------------------------------------
+
+    # --- Keep everything below: SSH host key regeneration --------------------
+    # The image's host keys are baked in by the installer; without this,
+    # every VM cloned from the template would share the same SSH identity.
+    # This one-shot service regenerates keys on each clone's first boot.
+    - name: Create systemd service file for SSH host keys regeneration
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/regenerate_ssh_host_keys.service
+        content: |
+          [Unit]
+          Description=Regenerate SSH host keys
+          Before=ssh.service
+
+          [Service]
+          Type=oneshot
+          ExecStartPre=-/bin/sh -c "/bin/rm -f -v /etc/ssh/ssh_host_*_key*"
+          ExecStart=/usr/bin/ssh-keygen -A -v
+          ExecStartPost=/bin/systemctl disable regenerate_ssh_host_keys
+          [Install]
+          WantedBy=multi-user.target
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Reload systemd daemon
+      ansible.builtin.systemd:
+        daemon_reload: true
+
+    - name: Enable SSH host keys regeneration service
+      ansible.builtin.systemd:
+        name: regenerate_ssh_host_keys
+        enabled: true

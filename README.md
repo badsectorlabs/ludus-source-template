@@ -48,6 +48,17 @@ so submodules are pulled (and refreshed on re-sync) automatically. This lets a
 source aggregate content that lives in its own repository while keeping that repo
 independent for issues and development.
 
+> [!IMPORTANT]
+> `ludus source add` clones with `--recurse-submodules` automatically — but a
+> plain `git clone` does **not**, leaving submoduled assets (templates, roles)
+> as empty directories. To work with them locally, clone recursively:
+>
+> ```bash
+> git clone --recurse-submodules https://github.com/<you>/<repo>
+> # already cloned? pull them in with:
+> git submodule update --init --recursive
+> ```
+
 Use **relative** submodule URLs (e.g. `../ludus_adcs.git`) in `.gitmodules` so the
 source resolves submodules against whatever host it was cloned from.
 
